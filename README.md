@@ -36,10 +36,10 @@ RAGFile is a binary file format designed to address these limitations. The forma
    Below is the schema for RAGFiles as of v0.1.0, in order.
    1 - 3 are mandatory, 4 onward are semi-optional in that no section is strictly required, but the existence of one might mandate the existence of another. When this occurs, they will be denoted by sub-sections. 
 
-   1) "RAGFILE" header (verification of file)
-   2) RAGFile version (major,minor,patch)
-   3) Endianess (1 - Big Endian, 0 - Little Endian)
-   4) "Index strategy sections"
+   1) **"RAGFILE" header** (verification of file)
+   2) **RAGFile version** (major,minor,patch)
+   3) **Endianess** (1 - Big Endian, 0 - Little Endian)
+   4) **"Index strategy sections"**
       
       This section of the RAGFile contains any number of 
 
@@ -56,7 +56,7 @@ RAGFile is a binary file format designed to address these limitations. The forma
 
       below are supported formats in v0.1.0 
    
-   5) Keyword-content pairs
+   5) **Keyword-content pairs**
       
        I)  start-byte (the first byte that starts the first keyword-content pair)
 
@@ -71,7 +71,7 @@ RAGFile is a binary file format designed to address these limitations. The forma
       Also do note that content can be variable length, and there are approaches to narrow the search space further which will be a future feature. 
     
 
-6)  embedding-content pairs
+   6)  **Embedding-content pairs**
     
     I) precision - an integer representing the numerical precision of the embedding vectors. This is used to 
         
