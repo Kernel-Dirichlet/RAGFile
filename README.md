@@ -57,33 +57,33 @@ RAGFile is a binary file format designed to address these limitations. The forma
       below are supported formats in v0.1.0 
    
    5) Keyword-content pairs
+      
+       I)  start-byte (the first byte that starts the first keyword-content pair)
 
-     1) start-byte (the first byte that starts the first keyword-content pair)
+       II) end-byte (the last byte which is the last keyword-content pair)
 
-     2) end-byte (the last byte which is the last keyword-content pair)
+       III) padding - an integer which represents how many null \x00 bytes to pad in between each keyword-content pair and is designed to be read in chunks. For now, padding must be 4,8, or 16.  
 
-     3) padding - an integer which represents how many null \x00 bytes to pad in between each keyword-content pair and is designed to be read in chunks. For now, padding must be 4,8, or 16.  
+         keyword-content pairs are formatted as {keyword}-{content} (with a single "-" in between). 
 
-     keyword-content pairs are formatted as {keyword}-{content} (with a single "-" in between). 
+        When we search for keywords, we have the start and end byte boundaries. This has the benefit of supporting storage of other indexed data (ex. vector and graph) w/o impacting the retrieval speed of keyword-   content pairs.
 
-     When we search for keywords, we have the start and end byte boundaries. This has the benefit of supporting storage of other indexed data (ex. vector and graph) w/o impacting the retrieval speed of keyword-content pairs.
-
-     Also do note that content can be variable length, and there are approaches to narrow the search space further which will be a future feature. 
+      Also do note that content can be variable length, and there are approaches to narrow the search space further which will be a future feature. 
     
 
-    5) embedding-content pairs
+6)  embedding-content pairs
+    
+    I) precision - an integer representing the numerical precision of the embedding vectors. This is used to 
         
-        1) precision - an integer representing the numerical precision of the embedding vectors. This is used to 
-        
-        2) start-byte (the first byte that starts the first keyword-content pair)
+    II) start-byte (the first byte that starts the first keyword-content pair)
 
-        3) end-byte (the last byte which is the last keyword-content pair)
+    III) end-byte (the last byte which is the last keyword-content pair)
 
-        4) padding - an integer which represents how many null \x00 bytes to pad in between each keyword-content pair and is designed to be read in chunks. For now, padding must be 4,8, or 16.  
+    IV) padding - an integer which represents how many null \x00 bytes to pad in between each keyword-content pair and is designed to be read in chunks. For now, padding must be 4,8, or 16.  
 
-        embedding-content pairs are formed with the same structure as keyword-content pairs w/ {embedding}-{content}
+   embedding-content pairs are formed with the same structure as keyword-content pairs w/ {embedding}-{content}
 
-    Future updates will include graph and hypergraph formats which will encode node, edge, and hyperedge features where relevant. 
+   Future updates will include graph and hypergraph formats which will encode node, edge, and hyperedge features where relevant. 
 
         
 
