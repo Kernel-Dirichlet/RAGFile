@@ -1,0 +1,33 @@
+goos: linux
+goarch: amd64
+pkg: github.com/Kernel-Dirichlet/RAGFile/internal/tests
+cpu: Intel(R) N95
+BenchmarkWrite/size=1000_dim=64-4         	   12699	    279917 ns/op	 914.56 MB/s	  802960 B/op	       9 allocs/op
+BenchmarkWrite/size=1000_dim=128-4        	    6242	    525846 ns/op	 973.67 MB/s	 1319057 B/op	       9 allocs/op
+BenchmarkWrite/size=1000_dim=256-4        	    3514	   1032086 ns/op	 992.16 MB/s	 2343056 B/op	       9 allocs/op
+BenchmarkWrite/size=1000_dim=512-4        	    2076	   1666581 ns/op	1228.86 MB/s	 4391056 B/op	       9 allocs/op
+BenchmarkWrite/size=1000_dim=1024-4       	    1344	   2939909 ns/op	1393.24 MB/s	 8487056 B/op	       9 allocs/op
+BenchmarkWrite/size=1000_dim=2048-4       	     642	   5534941 ns/op	1480.05 MB/s	16679056 B/op	       9 allocs/op
+BenchmarkWrite/size=1000_dim=4096-4       	     354	  10232204 ns/op	1601.22 MB/s	33063056 B/op	       9 allocs/op
+BenchmarkWrite/size=5000_dim=64-4         	    3342	   1011250 ns/op	1265.76 MB/s	 4014224 B/op	       9 allocs/op
+BenchmarkWrite/size=5000_dim=128-4        	    1875	   1777986 ns/op	1439.83 MB/s	 6570128 B/op	       9 allocs/op
+BenchmarkWrite/size=5000_dim=256-4        	    1042	   3533698 ns/op	1448.91 MB/s	11690128 B/op	       9 allocs/op
+BenchmarkWrite/size=5000_dim=512-4        	     510	   7229002 ns/op	1416.52 MB/s	21930128 B/op	       9 allocs/op
+BenchmarkWrite/size=5000_dim=1024-4       	     264	  13856325 ns/op	1478.03 MB/s	42401936 B/op	       9 allocs/op
+BenchmarkWrite/size=5000_dim=2048-4       	     136	  26719443 ns/op	1532.97 MB/s	83378320 B/op	       9 allocs/op
+BenchmarkWrite/size=5000_dim=4096-4       	      70	  49280531 ns/op	1662.32 MB/s	165290128 B/op	       9 allocs/op
+BenchmarkWrite/size=10000_dim=64-4        	    1698	   1954921 ns/op	1309.52 MB/s	 8020112 B/op	       9 allocs/op
+BenchmarkWrite/size=10000_dim=128-4       	     904	   3707532 ns/op	1380.97 MB/s	13131920 B/op	       9 allocs/op
+BenchmarkWrite/size=10000_dim=256-4       	     512	   6821211 ns/op	1501.20 MB/s	23380112 B/op	       9 allocs/op
+BenchmarkWrite/size=10000_dim=512-4       	     267	  13052894 ns/op	1569.00 MB/s	43851920 B/op	       9 allocs/op
+BenchmarkWrite/size=10000_dim=1024-4      	     138	  26499862 ns/op	1545.67 MB/s	84811920 B/op	       9 allocs/op
+BenchmarkWrite/size=10000_dim=2048-4      	      66	  50734436 ns/op	1614.68 MB/s	166731920 B/op	       9 allocs/op
+BenchmarkWrite/size=10000_dim=4096-4      	      26	 125408909 ns/op	1306.45 MB/s	330555536 B/op	       9 allocs/op
+BenchmarkWrite/size=50000_dim=64-4        	     314	  11600259 ns/op	1103.42 MB/s	39944336 B/op	       9 allocs/op
+BenchmarkWrite/size=50000_dim=128-4       	     183	  19292080 ns/op	1326.97 MB/s	65552528 B/op	       9 allocs/op
+BenchmarkWrite/size=50000_dim=256-4       	     100	  34237768 ns/op	1495.42 MB/s	116744336 B/op	       9 allocs/op
+BenchmarkWrite/size=50000_dim=512-4       	      54	  63981145 ns/op	1600.47 MB/s	219160720 B/op	       9 allocs/op
+BenchmarkWrite/size=50000_dim=1024-4      	      22	 136881768 ns/op	1496.18 MB/s	423968912 B/op	       9 allocs/op
+BenchmarkWrite/size=50000_dim=2048-4      	signal: killed
+FAIL	github.com/Kernel-Dirichlet/RAGFile/internal/tests	125.842s
+FAIL
