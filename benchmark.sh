@@ -3,48 +3,44 @@ set -euo pipefail
 
 # RAGFile Comprehensive Benchmark Suite
 # ======================================
-# Runs benchmarks across various corpus sizes and dimensions.
-# Results are saved to benchmark_results.txt and benchmark_results.json
+# Runs Go + Python benchmarks and writes ALL results to a single file.
 
 OUT_DIR="./benchmark_output"
+RESULTS="$OUT_DIR/all_results.txt"
 mkdir -p "$OUT_DIR"
 
-echo "=== RAGFile Benchmark Suite ==="
-echo "Results will be saved to $OUT_DIR/"
-echo ""
+# Wipe previous results
+> "$RESULTS"
 
-# Run all tests (including benchmarks) with memory stats
-echo "Running benchmarks..."
-go test -bench=. -benchmem -benchtime=3s ./internal/tests/ 2>&1 | tee "$OUT_DIR/benchmark_results.txt"
+echo "=== RAGFile Benchmark Suite ===" | tee -a "$RESULTS"
+echo "Started: $(date)" | tee -a "$RESULTS"
+echo "" | tee -a "$RESULTS"
 
-echo ""
-echo "=== Benchmark results saved to $OUT_DIR/benchmark_results.txt ==="
+# -----------------------------------------------------------------------
+# GO – core benchmarks (Small / Medium / Large)
+# -----------------------------------------------------------------------
+echo "=== Go Benchmarks: Small / Medium / Large ===" | tee -a "$RESULTS"
+go test -bench="BenchmarkSmall|BenchmarkMedium|BenchmarkLarge" \
+        -benchmem -benchtime=3s ./internal/tests/ 2>&1 | tee -a "$RESULTS"
+echo "" | tee -a "$RESULTS"
 
-# Run a quick subset for fast feedback
-echo ""
-echo "=== Quick benchmark subset (for fast iteration) ==="
-go test -bench="BenchmarkSmall|BenchmarkMedium" -benchmem -benchtime=1s ./internal/tests/ 2>&1 | tee "$OUT_DIR/benchmark_quick.txt"
+# -----------------------------------------------------------------------
+# GO – concurrent benchmarks (thread-count sweep)
+# -----------------------------------------------------------------------
+echo "=== Go Benchmarks: Concurrent Reader/Writer ===" | tee -a "$RESULTS"
+go test -bench="BenchmarkConcurrent" \
+        -benchmem -benchtime=3s ./internal/tests/ 2>&1 | tee -a "$RESULTS"
+echo "" | tee -a "$RESULTS"
 
-echo ""
-echo "=== Quick results saved to $OUT_DIR/benchmark_quick.txt ==="
+# -----------------------------------------------------------------------
+# PYTHON – SQLite in-memory benchmarks
+# -----------------------------------------------------------------------
+echo "=== Python SQLite Benchmarks ===" | tee -a "$RESULTS"
+(cd "$(dirname "$0")" && source venv/bin/activate && python benchmark_python.py) \
+    2>&1 | tee -a "$RESULTS"
+echo "" | tee -a "$RESULTS"
 
-# Memory-focused benchmarks
+echo "=== All benchmarks complete ===" | tee -a "$RESULTS"
+echo "Finished: $(date)" | tee -a "$RESULTS"
 echo ""
-echo "=== Memory benchmarks ==="
-go test -bench=BenchmarkMemory -benchmem -benchtime=1s ./internal/tests/ 2>&1 | tee "$OUT_DIR/benchmark_memory.txt"
-
-echo ""
-echo "=== Memory results saved to $OUT_DIR/benchmark_memory.txt ==="
-
-# Scalability benchmarks
-echo ""
-echo "=== Scalability benchmarks ==="
-go test -bench=BenchmarkScalability -benchmem -benchtime=1s ./internal/tests/ 2>&1 | tee "$OUT_DIR/benchmark_scalability.txt"
-
-echo ""
-echo "=== Scalability results saved to $OUT_DIR/benchmark_scalability.txt ==="
-
-echo ""
-echo "All benchmarks complete!"
-echo "Files generated:"
-ls -lh "$OUT_DIR/"
+echo "Results written to $RESULTS"

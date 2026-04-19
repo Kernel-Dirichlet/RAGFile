@@ -1,0 +1,33 @@
+
+=== SMALL BENCHMARK ===
+
+--- WRITE ---
+Pairs: 100 | Emb: 16
+Size: 6400 bytes (0.01 MB)
+Write time: 0.0008s
+Write throughput: 7.88 MB/s
+
+--- SEARCH ---
+Search time: 0.0016s
+
+=== MEDIUM BENCHMARK ===
+
+--- WRITE ---
+Pairs: 1000 | Emb: 32
+Size: 128000 bytes (0.12 MB)
+Write time: 0.0081s
+Write throughput: 15.06 MB/s
+
+--- SEARCH ---
+Search time: 0.0159s
+
+=== LARGE BENCHMARK ===
+
+--- WRITE ---
+Pairs: 10000 | Emb: 64
+Size: 2560000 bytes (2.44 MB)
+Write time: 0.0725s
+Write throughput: 33.69 MB/s
+
+--- SEARCH ---
+Search time: 0.1486s

@@ -1,0 +1,38 @@
+=== RAGFile Benchmark Comparison ===
+=== Go vs Python SQLite ===
+
+=== Go Benchmarks ===
+BenchmarkSmall-4    	
+BenchmarkMedium-4   	
+BenchmarkLarge-4    	
+
+=== Python Benchmarks ===
+=== SMALL BENCHMARK ===
+=== MEDIUM BENCHMARK ===
+=== LARGE BENCHMARK ===
+Write time: 0.0008s
+Search time: 0.0016s
+Write time: 0.0081s
+Search time: 0.0159s
+Write time: 0.0725s
+Search time: 0.1486s
+
+=== Detailed Metrics ===
+=== Small Benchmark ===
+Go Write Time: Write time: 16.41µs
+Go Search Time: Search time: 15.972µs
+Python Write Time: Write time: 0.0008s
+Python Search Time: Search time: 0.0016s
+
+=== Medium Benchmark ===
+Go Write Time: Write time: 14.281µs
+Go Search Time: Search time: 15.496µs
+Python Write Time: Write time: 0.0081s
+Python Search Time: Search time: 0.0159s
+
+=== Large Benchmark ===
+Go Write Time: Write time: 1.813608ms
+Go Search Time: Search time: 3.81854ms
+Python Write Time: Write time: 0.0725s
+Python Search Time: Search time: 0.1486s
+

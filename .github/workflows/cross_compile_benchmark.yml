@@ -1,0 +1,183 @@
+name: Cross-Compile & Benchmark
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  workflow_dispatch:   # allow manual trigger
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOBS
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 1. Cross-compile for every target from a single Linux runner.
+  #    This verifies the build compiles cleanly on all platforms.
+  # ───────────────────────────────────────────────────────────────────────────
+  cross-compile:
+    name: Cross-compile (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { goos: linux,   goarch: amd64   }
+          - { goos: linux,   goarch: arm64   }
+          - { goos: linux,   goarch: arm,    goarm: "7" }
+          - { goos: linux,   goarch: riscv64 }
+          - { goos: darwin,  goarch: amd64   }
+          - { goos: darwin,  goarch: arm64   }
+          - { goos: windows, goarch: amd64   }
+          - { goos: windows, goarch: arm64   }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build
+        env:
+          GOOS:   ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GOARM:  ${{ matrix.goarm }}
+          CGO_ENABLED: "0"
+        run: |
+          EXT=""
+          [[ "$GOOS" == "windows" ]] && EXT=".exe"
+          go build -v -o "ragfile-${{ matrix.goos }}-${{ matrix.goarch }}${EXT}" ./...
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ragfile-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: ragfile-${{ matrix.goos }}-${{ matrix.goarch }}*
+          retention-days: 7
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 2. Native benchmarks – run on each available hosted runner.
+  #    Results are uploaded as artifacts for comparison.
+  # ───────────────────────────────────────────────────────────────────────────
+  benchmark-native:
+    name: Benchmark (${{ matrix.runner }} / ${{ matrix.label }})
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            label:  linux-amd64
+          - runner: macos-latest
+            label:  darwin-arm64
+          - runner: windows-latest
+            label:  windows-amd64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # ── unit tests first ──────────────────────────────────────────────────
+      - name: Run tests
+        run: go test ./internal/tests/ -v -count=1 -timeout 120s
+
+      # ── core benchmarks (Small / Medium / Large) ──────────────────────────
+      - name: Benchmark – Small / Medium / Large
+        shell: bash
+        run: |
+          mkdir -p benchmark_output
+          go test -bench="BenchmarkSmall$|BenchmarkMedium$|BenchmarkLarge$" \
+                  -benchmem -benchtime=3s \
+                  ./internal/tests/ \
+            | tee benchmark_output/core_${{ matrix.label }}.txt
+
+      # ── concurrent benchmarks (goroutine scaling) ─────────────────────────
+      - name: Benchmark – Concurrent (goroutine sweep)
+        shell: bash
+        run: |
+          go test -bench="BenchmarkConcurrentWrite$|BenchmarkConcurrentSearch$|BenchmarkConcurrentSearchVsBaseline$" \
+                  -benchmem -benchtime=3s \
+                  ./internal/tests/ \
+            | tee benchmark_output/concurrent_${{ matrix.label }}.txt
+
+      # ── scalability benchmarks ────────────────────────────────────────────
+      - name: Benchmark – Scalability
+        shell: bash
+        run: |
+          go test -bench="BenchmarkScalability$" \
+                  -benchmem -benchtime=1s \
+                  ./internal/tests/ \
+            | tee benchmark_output/scalability_${{ matrix.label }}.txt
+
+      # ── combine into one summary file ─────────────────────────────────────
+      - name: Combine results
+        shell: bash
+        run: |
+          {
+            echo "=== RAGFile Benchmark Results ==="
+            echo "Runner : ${{ matrix.runner }}"
+            echo "Label  : ${{ matrix.label }}"
+            echo "Date   : $(date -u)"
+            echo ""
+            echo "--- Core (Small / Medium / Large) ---"
+            cat benchmark_output/core_${{ matrix.label }}.txt
+            echo ""
+            echo "--- Concurrent (goroutine sweep) ---"
+            cat benchmark_output/concurrent_${{ matrix.label }}.txt
+            echo ""
+            echo "--- Scalability ---"
+            cat benchmark_output/scalability_${{ matrix.label }}.txt
+          } > benchmark_output/all_${{ matrix.label }}.txt
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ matrix.label }}
+          path: benchmark_output/all_${{ matrix.label }}.txt
+          retention-days: 30
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # 3. Collect all native results and post a summary to the workflow run.
+  # ───────────────────────────────────────────────────────────────────────────
+  summarise:
+    name: Summarise benchmark results
+    runs-on: ubuntu-latest
+    needs: benchmark-native
+    if: always()
+
+    steps:
+      - name: Download all benchmark artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-results-*
+          merge-multiple: true
+          path: results/
+
+      - name: Print summary
+        run: |
+          echo "## RAGFile Benchmark Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          for f in results/*.txt; do
+            label=$(basename "$f" .txt | sed 's/^all_//')
+            echo "### $label" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            grep -E "^Benchmark|^ok|^PASS|^FAIL" "$f" >> "$GITHUB_STEP_SUMMARY" || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Upload combined results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-all-platforms
+          path: results/
+          retention-days: 30
